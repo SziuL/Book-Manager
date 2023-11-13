@@ -15,6 +15,7 @@ int main()
 	printf("Digite a opcao desejada: ");
 	scanf("%d", &escolha);
 
+
 	while (escolha != 6)
 	{
 		if (escolha == 1)

@@ -154,6 +154,7 @@ Livro *buscarLivro(Livro *livros, char *isbn)
 {
 	int isbnEncriptado = encriptar(isbn);
 
+
 	if (livros)
 	{
 		Livro *auxLivro = livros;

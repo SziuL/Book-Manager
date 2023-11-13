@@ -28,4 +28,5 @@ Livro *sucessor(Livro *livro);
 Livro *predecessor(Livro *livro);
 Livro *coletaDadosNovoLivro();
 
+
 #endif
