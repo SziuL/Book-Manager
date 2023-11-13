@@ -2,7 +2,7 @@
 
 int main()
 {
-
+	Filial *filiais;
 	int escolha;
 
 	printf("1 - Listar os dados de todas as filiais.\n"
@@ -26,7 +26,12 @@ int main()
 		else if (escolha == 4)
 			excluirFilial(); // transferir base de dados para outra filial
 		else if (escolha == 5)
-			operacoesFilial();
+		{
+			printf("Informe o ID da filial desejada: ");
+			int id;
+			scanf("%d", &id);
+			operacoesFilial(filiais, id); // opções de ações para se realizar dentro de uma filial
+		}
 		else if (escolha == 6)
 			exit(1);
 		else

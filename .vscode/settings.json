@@ -1,0 +1,30 @@
+{
+  "files.associations": {
+    "funcionalidades.c": "c",
+    "funcionalidades.h": "c",
+    "estruturas.h": "c",
+    "main.c": "c"
+  },
+  "editor.fontFamily": "JetBrains Mono, Bold",
+  "debug.console.fontFamily": "JetBrains Mono, Bold",
+  "terminal.integrated.fontWeightBold": "500",
+  "terminal.integrated.fontWeight": "500",
+  "editor.fontVariations": true,
+  "workbench.colorTheme": "Green",
+  "prettier.bracketSameLine": true,
+  "prettier.enableDebugLogs": true,
+  "editor.indentSize": "tabSize",
+  "editor.renderWhitespace": "none",
+  "editor.cursorStyle": "block",
+  "terminal.integrated.cursorWidth": 0,
+  "editor.guides.bracketPairs": true,
+  "debug.terminal.clearBeforeReusing": true,
+  "terminal.integrated.localEchoStyle": "dim",
+  "terminal.integrated.fontFamily": "monospace",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.enableBell": false,
+  "terminal.integrated.letterSpacing": 0.8,
+  "terminal.integrated.lineHeight": 1.1,
+  "terminal.integrated.localEchoEnabled": "auto",
+  "terminal.integrated.smoothScrolling": true
+}

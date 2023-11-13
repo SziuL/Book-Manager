@@ -1,10 +1,14 @@
+#ifndef funcionalidades_h
+#define funcionalidades_h
+
 #include "estruturas.h"
 
 // funções para filiais
-Livro *buscarLivro(Filial *L, int idFilial, char *isbn);
-void listarLivros(Filial *filial);
-void inserirLivro(Livro *livro, Filial *L, int idFilial);
-void excluirLivro(Livro *livro);
+void listarLivrosOrdemCrescente(Livro *livros);
+void inserirLivro(Livro *livros, Livro *novoLivro);
+Livro *buscarLivro(Livro *livros, char *isbn);
+void imprimirEstrutura(Livro *livros);
+void excluirLivro(Livro *livros, char *isbn);
 void atualizarExemplar(Livro *livro);
 
 // operações de menu
@@ -12,7 +16,7 @@ void listarTodasFiliais();
 void listarFilial();
 void coletaDadosFilial();
 void excluirFilial();
-void operacoesFilial();
+void operacoesFilial(Filial *L, int id);
 
 // complementares
 void transferirBaseDados(Filial *L, int idAntiga, int idNova);
@@ -22,3 +26,6 @@ Livro *menor(Livro *livro);
 Livro *maior(Livro *livro);
 Livro *sucessor(Livro *livro);
 Livro *predecessor(Livro *livro);
+Livro *coletaDadosNovoLivro();
+
+#endif

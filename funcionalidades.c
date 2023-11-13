@@ -118,39 +118,45 @@ Livro *predecessor(Livro *livro)
 {
 	if (livro == NULL)
 		return NULL;
-	
+
 	if (livro->esq != NULL)
 		return maior(livro->esq);
 	else
 	{
-		Livro *aux = livro;
+		Livro *aux = livro->pai;
 		int isbnPai = encriptar(aux->isbn);
 		int isbnNo = encriptar(livro->isbn);
 
 		while (aux != NULL && isbnPai > isbnNo)
-		{
-			/* code */
-		}
-		
+			aux = aux->pai;
+
+		return aux;
 	}
-	
-
-	
-	
-
-	
-	
 }
 
-// Funções para filiais
-Livro *buscarLivro(Filial *L, int idFilial, char *isbn)
+Livro *coletaDadosNovoLivro()
 {
-	Filial *aux = buscaFilial(L, idFilial);
+	char isbn[5], titulo[20], autor[30];
+	int qtd;
+
+	printf("Informe o ISBN do novo livro: \n");
+	scanf("%s", &isbn);
+	printf("Agora informe o titulo e autor do livro, respectivamente  ('titulo' 'autor'): \n");
+	scanf("%s %s", &titulo, &autor);
+
+	Livro *novoLivro = criaLivro(isbn, titulo, autor);
+
+	return novoLivro;
+}
+
+// operações com LIVROS
+Livro *buscarLivro(Livro *livros, char *isbn)
+{
 	int isbnEncriptado = encriptar(isbn);
 
-	if (aux)
+	if (livros)
 	{
-		Livro *auxLivro = aux->livros;
+		Livro *auxLivro = livros;
 		int isbnAtual = encriptar(auxLivro->isbn);
 
 		while (auxLivro != NULL)
@@ -176,15 +182,14 @@ Livro *buscarLivro(Filial *L, int idFilial, char *isbn)
 	return NULL;
 }
 
-void inserirLivro(Livro *livro, Filial *L, int idFilial)
+void inserirLivro(Livro *livros, Livro *novoLivro)
 {
-	Filial *aux = buscaFilial(L, idFilial);
 
-	if (aux)
+	if (livros)
 	{
-		Livro *livroAtual = aux->livros;
+		Livro *livroAtual = livros;
 		int atual = encriptar(livroAtual->isbn);
-		int isbnNovo = encriptar(livro->isbn);
+		int isbnNovo = encriptar(novoLivro->isbn);
 
 		while (livroAtual != NULL)
 		{
@@ -192,8 +197,8 @@ void inserirLivro(Livro *livro, Filial *L, int idFilial)
 			{
 				if (livroAtual->esq == NULL)
 				{
-					livroAtual->esq = livro;
-					livro->pai = livroAtual;
+					livroAtual->esq = novoLivro;
+					novoLivro->pai = livroAtual;
 				}
 				livroAtual = livroAtual->esq;
 			}
@@ -201,8 +206,8 @@ void inserirLivro(Livro *livro, Filial *L, int idFilial)
 			{
 				if (livroAtual->dir == NULL)
 				{
-					livroAtual->dir = livro;
-					livro->pai = livroAtual;
+					livroAtual->dir = novoLivro;
+					novoLivro->pai = livroAtual;
 				}
 				livroAtual = livroAtual->dir;
 			}
@@ -210,6 +215,76 @@ void inserirLivro(Livro *livro, Filial *L, int idFilial)
 	}
 }
 
-void excluirLivro(Livro *livro)
+void excluirLivro(Livro *livros, char *isbn)
 {
+	int excluirIsbn = encriptar(isbn);
+	int isbnAtual = encriptar(livros->isbn);
+	Livro *auxLivro = livros;
+
+	while (auxLivro != NULL)
+	{
+		if (excluirIsbn == isbnAtual)
+			return livros;
+		else if (excluirIsbn < isbnAtual)
+			isbnAtual = encriptar(auxLivro->esq->isbn);
+		else if (excluirIsbn > isbnAtual)
+			isbnAtual = encriptar(auxLivro->dir->isbn);
+
+		if (auxLivro)
+			isbnAtual = encriptar(auxLivro->isbn);
+	}
 }
+
+void operacoesFilial(Filial *L, int id)
+{
+	Filial *filial = buscaFilial(L, id);
+	int escolha;
+
+	printf("1 - Imprimir lista de livros em ordem crescente de ISBN.\n"
+		   "2 - Inserir novo livro.\n"
+		   "3 - Buscar livro.\n"
+		   "4 - Imprimir estrutura de arvore dos livros com ISBN.\n"
+		   "5 - Excluir livro.\n"
+		   "6 - Retornar ao menu principal.\n\n");
+
+	printf("Digite a opcao desejada: ");
+	scanf("%d", &escolha);
+
+	while (escolha != 6)
+	{
+		if (escolha == 1)
+			listarLivrosOrdemCrescente(filial->livros);
+		else if (escolha == 2)
+		{
+			Livro *novoLivro = coletaDadosNovoLivro();
+			inserirLivro(filial->livros, novoLivro);
+		}
+		else if (escolha == 3)
+		{
+			printf("Insira o ISBN do livro que deseja encontrar: \n");
+			char isbn[5];
+			scanf("%s", &isbn);
+			buscarLivro(filial->livros, isbn);
+		}
+		else if (escolha == 4)
+			imprimirEstrutura(filial->livros);
+		else if (escolha == 5)
+		{
+			printf("Insira o ISBN do livro que deseja excluir: \n");
+			char isbn[5];
+			scanf("%s", &isbn);
+			excluirLivro(filial->livros, isbn);
+		}
+		else if (escolha == 6)
+			main();
+		else
+		{
+			printf("Escolha invalida.\n"
+				   "Por favor, digite um numero valido.\n");
+			system("cls");
+		}
+	}
+}
+
+
+// operações com FILIAIS
