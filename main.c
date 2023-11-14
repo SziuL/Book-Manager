@@ -2,6 +2,8 @@
 
 void programa(Filial *filiais)
 {
+	sleep(3);
+	system("clear");
 	int escolha;
 
 	printf("1 - Listar os dados de todas as filiais.\n"
@@ -13,7 +15,7 @@ void programa(Filial *filiais)
 
 	printf("Digite a opcao desejada: ");
 	scanf("%d", &escolha);
-	int a = 0;
+
 	while (escolha != 6)
 	{
 		if (escolha == 1)
@@ -52,7 +54,7 @@ void programa(Filial *filiais)
 		{
 			printf("Escolha invalida.\n"
 				   "Por favor, digite um numero valido.\n");
-			system("cls");
+			programa(filiais);
 		}
 	}
 }

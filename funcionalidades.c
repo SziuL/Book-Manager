@@ -50,9 +50,19 @@ int encriptar(char isbn[5])
 Filial *buscaFilial(Filial *filiais, int id, Filial **pred)
 {
 	Filial *aux = filiais;
+	if (!aux)
+	{
+		printf("Nao ha filiais registradas!\n");
+		programa(filiais);
+	}
 	while (aux->id != id && aux != NULL)
 		aux = aux->prox;
 
+	if (aux == NULL)
+	{
+		printf("Filial nao enconteada.\n");
+		programa(filiais);
+	}
 	return aux;
 }
 
