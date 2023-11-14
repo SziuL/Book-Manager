@@ -14,18 +14,21 @@ int main()
 
 	printf("Digite a opcao desejada: ");
 	scanf("%d", &escolha);
-
-
+	int a = 0;
 	while (escolha != 6)
 	{
 		if (escolha == 1)
-			listarTodasFiliais();
+			// listarTodasFiliais();
+			a = 1;
 		else if (escolha == 2)
-			listarFilial();
+			// listarFilial();
+			a = 1;
 		else if (escolha == 3)
-			coletaDadosFilial(); // para criar uma nova filial
+			// coletaDadosFilial(); // para criar uma nova filial
+			a = 1;
 		else if (escolha == 4)
-			excluirFilial(); // transferir base de dados para outra filial
+			// excluirFilial(); // transferir base de dados para outra filial
+			a = 1;
 		else if (escolha == 5)
 		{
 			printf("Informe o ID da filial desejada: ");

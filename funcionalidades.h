@@ -7,8 +7,8 @@
 void listarLivrosOrdemCrescente(Livro *livros);
 void inserirLivro(Livro *livros, Livro *novoLivro);
 Livro *buscarLivro(Livro *livros, char *isbn);
-void imprimirEstrutura(Livro *livros);
-void excluirLivro(Livro *livros, char *isbn);
+void imprimirEstrutura(Livro *livros, int n);
+Livro *excluirLivro(Livro *livros, char *isbn);
 void atualizarExemplar(Livro *livro);
 
 // operações de menu
@@ -27,6 +27,9 @@ Livro *maior(Livro *livro);
 Livro *sucessor(Livro *livro);
 Livro *predecessor(Livro *livro);
 Livro *coletaDadosNovoLivro();
+void imprimeIsbn(char *isbn, int n);
 
+// main
+int main();
 
 #endif

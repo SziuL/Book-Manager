@@ -58,13 +58,14 @@ Filial *buscaFilial(Filial *L, int id)
 
 Livro *menor(Livro *livro)
 {
+	Livro *aux = livro;
+
 	if (livro == NULL)
 	{
 		return NULL;
 	}
 	else
 	{
-		Livro *aux = livro;
 		while (aux != NULL)
 		{
 			if (aux->esq == NULL)
@@ -73,17 +74,19 @@ Livro *menor(Livro *livro)
 				aux = aux->esq;
 		}
 	}
+
+	return aux;
 }
 
 Livro *maior(Livro *livro)
 {
+	Livro *aux = livro;
 	if (livro == NULL)
 	{
 		return NULL;
 	}
 	else
 	{
-		Livro *aux = livro;
 		while (aux != NULL)
 		{
 			if (aux->dir == NULL)
@@ -92,6 +95,8 @@ Livro *maior(Livro *livro)
 				aux = aux->dir;
 		}
 	}
+
+	return aux;
 }
 
 Livro *sucessor(Livro *livro)
@@ -140,20 +145,35 @@ Livro *coletaDadosNovoLivro()
 	int qtd;
 
 	printf("Informe o ISBN do novo livro: \n");
-	scanf("%s", &isbn);
+	scanf("%s", isbn);
 	printf("Agora informe o titulo e autor do livro, respectivamente  ('titulo' 'autor'): \n");
-	scanf("%s %s", &titulo, &autor);
+	scanf("%s %s", titulo, autor);
 
 	Livro *novoLivro = criaLivro(isbn, titulo, autor);
 
 	return novoLivro;
 }
 
+/**
+ * A função "imprimeIsbn" imprime o número ISBN fornecido com um nível de recuo especificado.
+ *
+ *  Isbn é um ponteiro para uma matriz de caracteres que representa o número ISBN.
+ * O parâmetro `n` representa o número de espaços a serem impressos antes da impressão do ISBN.
+ */
+void imprimeIsbn(char *isbn, int n)
+{
+	for (int i = 0; i < n; i++)
+		printf("   ");
+	if (strcmp(isbn, "0000") != 0)
+		printf("%s\n", isbn);
+	else
+		printf(" \n");
+}
+
 // operações com LIVROS
 Livro *buscarLivro(Livro *livros, char *isbn)
 {
 	int isbnEncriptado = encriptar(isbn);
-
 
 	if (livros)
 	{
@@ -216,24 +236,76 @@ void inserirLivro(Livro *livros, Livro *novoLivro)
 	}
 }
 
-void excluirLivro(Livro *livros, char *isbn)
+void imprimirEstrutura(Livro *livros, int n)
+{
+	if (livros == NULL)
+	{
+		imprimeIsbn("0000", n);
+		return;
+	}
+	imprimirEstrutura(livros->dir, n + 1);
+	imprimeIsbn(livros->isbn, n);
+	imprimirEstrutura(livros->esq, n + 1);
+}
+
+Livro *excluirLivro(Livro *livros, char *isbn)
 {
 	int excluirIsbn = encriptar(isbn);
-	int isbnAtual = encriptar(livros->isbn);
-	Livro *auxLivro = livros;
+	Livro *auxLivro = buscarLivro(livros, isbn);
 
-	while (auxLivro != NULL)
+	if (auxLivro->esq == NULL && auxLivro->dir == NULL)
 	{
-		if (excluirIsbn == isbnAtual)
-			return livros;
-		else if (excluirIsbn < isbnAtual)
-			isbnAtual = encriptar(auxLivro->esq->isbn);
-		else if (excluirIsbn > isbnAtual)
-			isbnAtual = encriptar(auxLivro->dir->isbn);
-
-		if (auxLivro)
-			isbnAtual = encriptar(auxLivro->isbn);
+		if (auxLivro == livros)
+			livros = NULL;
+		else
+		{
+			if (excluirIsbn < encriptar(auxLivro->pai->isbn))
+				auxLivro->pai->esq = NULL;
+			else
+				auxLivro->pai->dir = NULL;
+		}
 	}
+	else if (auxLivro->esq != NULL && auxLivro->dir == NULL)
+	{
+		if (auxLivro == livros)
+		{
+			livros = auxLivro->esq;
+			livros->pai = NULL;
+		}
+		else
+		{
+			auxLivro->esq->pai = auxLivro->pai;
+			if (excluirIsbn < encriptar(auxLivro->pai->isbn))
+				auxLivro->pai->esq = auxLivro->esq;
+			else
+				auxLivro->pai->dir = auxLivro->esq;
+		}
+	}
+	else if (auxLivro->esq == NULL && auxLivro->dir != NULL)
+	{
+		if (auxLivro == livros)
+		{
+			livros = auxLivro->dir;
+			livros->pai = NULL;
+		}
+		else
+		{
+			auxLivro->dir->pai = auxLivro->pai;
+			if (excluirIsbn < encriptar(auxLivro->pai->isbn))
+				auxLivro->pai->esq = auxLivro->dir;
+			else
+				auxLivro->pai->dir = auxLivro->dir;
+		}
+	}
+	else
+	{
+		Livro *retornoMaior = maior(auxLivro);
+
+		strcpy(auxLivro->isbn, retornoMaior->isbn);
+		auxLivro->dir = excluirLivro(auxLivro->dir, isbn);
+	}
+
+	return livros;
 }
 
 void operacoesFilial(Filial *L, int id)
@@ -250,11 +322,12 @@ void operacoesFilial(Filial *L, int id)
 
 	printf("Digite a opcao desejada: ");
 	scanf("%d", &escolha);
-
+	int a = 0;
 	while (escolha != 6)
 	{
 		if (escolha == 1)
-			listarLivrosOrdemCrescente(filial->livros);
+			// listarLivrosOrdemCrescente(filial->livros);
+			a = 1;
 		else if (escolha == 2)
 		{
 			Livro *novoLivro = coletaDadosNovoLivro();
@@ -264,16 +337,16 @@ void operacoesFilial(Filial *L, int id)
 		{
 			printf("Insira o ISBN do livro que deseja encontrar: \n");
 			char isbn[5];
-			scanf("%s", &isbn);
+			scanf("%s", isbn);
 			buscarLivro(filial->livros, isbn);
 		}
 		else if (escolha == 4)
-			imprimirEstrutura(filial->livros);
+			imprimirEstrutura(filial->livros, 0);
 		else if (escolha == 5)
 		{
 			printf("Insira o ISBN do livro que deseja excluir: \n");
 			char isbn[5];
-			scanf("%s", &isbn);
+			scanf("%s", isbn);
 			excluirLivro(filial->livros, isbn);
 		}
 		else if (escolha == 6)
@@ -286,6 +359,5 @@ void operacoesFilial(Filial *L, int id)
 		}
 	}
 }
-
 
 // operações com FILIAIS
