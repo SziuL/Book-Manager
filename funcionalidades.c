@@ -47,7 +47,7 @@ int encriptar(char isbn[5])
 	return soma;
 }
 
-Filial *buscaFilial(Filial *filiais, int id)
+Filial *buscaFilial(Filial *filiais, int id, Filial **pred)
 {
 	Filial *aux = filiais;
 	while (aux->id != id && aux != NULL)
@@ -142,6 +142,29 @@ void inserirFilial(Filial *filiais, Filial *novaFilial)
 	}
 
 	printf("Filial inserida com sucesso!\n");
+}
+
+void percorreLivros(Livro *livrosOrigem, Livro *baseDadosDestino)
+{
+	Livro *aux = livrosOrigem;
+	if (aux != NULL)
+	{
+		aux = livrosOrigem->esq;
+		percorreLivros(aux, baseDadosDestino);
+		inserirLivro(baseDadosDestino, aux);
+		aux = livrosOrigem->dir;
+		percorreLivros(aux, baseDadosDestino);
+	}
+	Livro *excluir;
+
+	if (excluir != NULL)
+	{
+		excluir = livrosOrigem->esq;
+		percorreLivros(excluir, baseDadosDestino);
+		free(excluir);
+		excluir = livrosOrigem->dir;
+		percorreLivros(excluir, baseDadosDestino);
+	}
 }
 
 // operações com LIVROS
@@ -299,7 +322,7 @@ Livro *excluirLivro(Livro *livros, char *isbn)
 
 void selecionaFilial(Filial *filiais, int id)
 {
-	Filial *filial = buscaFilial(filiais, id);
+	Filial *filial = buscaFilial(filiais, id, NULL);
 	operacoesFilial(filiais, filial->livros);
 }
 
@@ -372,7 +395,7 @@ void listarTodasFiliais(Filial *filiais)
 
 void listarFilial(Filial *filiais, int id)
 {
-	Filial *filial = buscaFilial(filiais, id);
+	Filial *filial = buscaFilial(filiais, id, NULL);
 
 	printf("Dados da Filial selecionada\n\n");
 	printf("ID: %d\nEndereco: %s\nGerente: %s", filial->id, filial->endereco, filial->gerente);
@@ -393,4 +416,25 @@ Filial *coletaDadosFilial()
 	Filial *novaFilial = criaFilial(endereco, gerente, id);
 
 	return novaFilial;
+}
+
+void excluirFilial(Filial *filiais, int idOrigem, int idDestino)
+{
+	Filial *pred;
+	Filial *filialOrigem = buscaFilial(filiais, idOrigem, &pred);
+	Filial *filialDestino = buscaFilial(filiais, idDestino, NULL);
+
+	if (!filialOrigem && !filialDestino)
+	{
+		printf("Algo deu errado! Verifique se os IDs estao corretos\n"
+			   "ou se as filiais informadas realmente existem.\n");
+		programa(filiais);
+	}
+	else
+	{
+		percorreLivros(filialOrigem->livros, filialDestino->livros);
+
+		pred->prox = filialOrigem->prox;
+		free(filialOrigem);
+	}
 }

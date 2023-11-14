@@ -31,7 +31,14 @@ void programa(Filial *filiais)
 			inserirFilial(filiais, novaFilial);
 		}
 		else if (escolha == 4)
-			excluirFilial(); // transferir base de dados para outra filial
+		{
+			printf("Informe o ID da filial a ser excluida: ");
+			int idOrigem, idDestino;
+			scanf("%d", &idOrigem);
+			printf("Informe o ID da filial que receberá os dados da antiga: ");
+			scanf("%d", &idDestino);
+			excluirFilial(filiais, idOrigem, idDestino); // transferir base de dados para outra filial
+		}
 		else if (escolha == 5)
 		{
 			printf("Informe o ID da filial desejada: ");
