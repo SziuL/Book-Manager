@@ -1,8 +1,7 @@
 #include "funcionalidades.c"
 
-int main()
+void programa(Filial *filiais)
 {
-	Filial *filiais;
 	int escolha;
 
 	printf("1 - Listar os dados de todas as filiais.\n"
@@ -18,23 +17,27 @@ int main()
 	while (escolha != 6)
 	{
 		if (escolha == 1)
-			// listarTodasFiliais();
-			a = 1;
+			listarTodasFiliais(filiais);
 		else if (escolha == 2)
-			// listarFilial();
-			a = 1;
+		{
+			printf("Informe o ID da filial desejada: ");
+			int id;
+			scanf("%d", &id);
+			listarFilial(filiais, id);
+		}
 		else if (escolha == 3)
-			// coletaDadosFilial(); // para criar uma nova filial
-			a = 1;
+		{
+			Filial *novaFilial = coletaDadosFilial(); // para criar uma nova filial
+			inserirFilial(filiais, novaFilial);
+		}
 		else if (escolha == 4)
-			// excluirFilial(); // transferir base de dados para outra filial
-			a = 1;
+			excluirFilial(); // transferir base de dados para outra filial
 		else if (escolha == 5)
 		{
 			printf("Informe o ID da filial desejada: ");
 			int id;
 			scanf("%d", &id);
-			operacoesFilial(filiais, id); // opções de ações para se realizar dentro de uma filial
+			selecionaFilial(filiais, id); // opções de ações para se realizar dentro de uma filial
 		}
 		else if (escolha == 6)
 			exit(1);
@@ -45,6 +48,12 @@ int main()
 			system("cls");
 		}
 	}
+}
+
+int main()
+{
+	Filial *filiais = NULL;
+	programa(filiais);
 
 	return 0;
 }

@@ -47,9 +47,9 @@ int encriptar(char isbn[5])
 	return soma;
 }
 
-Filial *buscaFilial(Filial *L, int id)
+Filial *buscaFilial(Filial *filiais, int id)
 {
-	Filial *aux = L;
+	Filial *aux = filiais;
 	while (aux->id != id && aux != NULL)
 		aux = aux->prox;
 
@@ -99,46 +99,6 @@ Livro *maior(Livro *livro)
 	return aux;
 }
 
-Livro *sucessor(Livro *livro)
-{
-	if (livro == NULL)
-		return NULL;
-
-	if (livro->dir != NULL)
-		return menor(livro->dir);
-	else
-	{
-		Livro *aux = livro->pai;
-		int isbnPai = encriptar(aux->isbn);
-		int isbnNo = encriptar(livro->isbn);
-
-		while (aux != NULL && isbnPai < isbnNo)
-			aux = aux->pai;
-
-		return aux;
-	}
-}
-
-Livro *predecessor(Livro *livro)
-{
-	if (livro == NULL)
-		return NULL;
-
-	if (livro->esq != NULL)
-		return maior(livro->esq);
-	else
-	{
-		Livro *aux = livro->pai;
-		int isbnPai = encriptar(aux->isbn);
-		int isbnNo = encriptar(livro->isbn);
-
-		while (aux != NULL && isbnPai > isbnNo)
-			aux = aux->pai;
-
-		return aux;
-	}
-}
-
 Livro *coletaDadosNovoLivro()
 {
 	char isbn[5], titulo[20], autor[30];
@@ -156,9 +116,6 @@ Livro *coletaDadosNovoLivro()
 
 /**
  * A função "imprimeIsbn" imprime o número ISBN fornecido com um nível de recuo especificado.
- *
- *  Isbn é um ponteiro para uma matriz de caracteres que representa o número ISBN.
- * O parâmetro `n` representa o número de espaços a serem impressos antes da impressão do ISBN.
  */
 void imprimeIsbn(char *isbn, int n)
 {
@@ -170,7 +127,39 @@ void imprimeIsbn(char *isbn, int n)
 		printf(" \n");
 }
 
+void inserirFilial(Filial *filiais, Filial *novaFilial)
+{
+	Filial *aux = filiais;
+	if (aux == NULL)
+	{
+		filiais = novaFilial;
+	}
+	else
+	{
+		while (aux->prox != NULL)
+			aux = aux->prox;
+		aux->prox = novaFilial;
+	}
+
+	printf("Filial inserida com sucesso!\n");
+}
+
 // operações com LIVROS
+void listarLivrosOrdemCrescente(Filial *filiais, Livro *livros)
+{
+	if (livros == NULL)
+	{
+		printf("Filial nao possui livros!\n");
+		operacoesFilial(filiais, livros);
+	}
+	else
+	{
+		listarLivrosOrdemCrescente(filiais, livros->esq);
+		printf("%s\t", livros->isbn);
+		listarLivrosOrdemCrescente(filiais, livros->dir);
+	}
+}
+
 Livro *buscarLivro(Livro *livros, char *isbn)
 {
 	int isbnEncriptado = encriptar(isbn);
@@ -274,7 +263,7 @@ Livro *excluirLivro(Livro *livros, char *isbn)
 		}
 		else
 		{
-			auxLivro->esq->pai = auxLivro->pai;
+			auxLivro->esq->pai = auxLivro->pai; // ligação do filho de auxLivro com seu "avô"
 			if (excluirIsbn < encriptar(auxLivro->pai->isbn))
 				auxLivro->pai->esq = auxLivro->esq;
 			else
@@ -308,9 +297,14 @@ Livro *excluirLivro(Livro *livros, char *isbn)
 	return livros;
 }
 
-void operacoesFilial(Filial *L, int id)
+void selecionaFilial(Filial *filiais, int id)
 {
-	Filial *filial = buscaFilial(L, id);
+	Filial *filial = buscaFilial(filiais, id);
+	operacoesFilial(filiais, filial->livros);
+}
+
+void operacoesFilial(Filial *filiais, Livro *livros)
+{
 	int escolha;
 
 	printf("1 - Imprimir lista de livros em ordem crescente de ISBN.\n"
@@ -326,31 +320,30 @@ void operacoesFilial(Filial *L, int id)
 	while (escolha != 6)
 	{
 		if (escolha == 1)
-			// listarLivrosOrdemCrescente(filial->livros);
-			a = 1;
+			listarLivrosOrdemCrescente(filiais, livros);
 		else if (escolha == 2)
 		{
 			Livro *novoLivro = coletaDadosNovoLivro();
-			inserirLivro(filial->livros, novoLivro);
+			inserirLivro(livros, novoLivro);
 		}
 		else if (escolha == 3)
 		{
 			printf("Insira o ISBN do livro que deseja encontrar: \n");
 			char isbn[5];
 			scanf("%s", isbn);
-			buscarLivro(filial->livros, isbn);
+			buscarLivro(livros, isbn);
 		}
 		else if (escolha == 4)
-			imprimirEstrutura(filial->livros, 0);
+			imprimirEstrutura(livros, 0);
 		else if (escolha == 5)
 		{
 			printf("Insira o ISBN do livro que deseja excluir: \n");
 			char isbn[5];
 			scanf("%s", isbn);
-			excluirLivro(filial->livros, isbn);
+			excluirLivro(livros, isbn);
 		}
 		else if (escolha == 6)
-			main();
+			programa(filiais);
 		else
 		{
 			printf("Escolha invalida.\n"
@@ -361,3 +354,43 @@ void operacoesFilial(Filial *L, int id)
 }
 
 // operações com FILIAIS
+void listarTodasFiliais(Filial *filiais)
+{
+	Filial *aux = filiais;
+	if (!aux)
+	{
+		printf("Nao ha filiais cadastradas.\n");
+		programa(filiais);
+	}
+	printf("Lista de Filiais\n\n");
+	while (aux != NULL)
+	{
+		printf("1\n\tID: %d\n\tEndereco: %s\n\tGerente: %s\n\n", aux->id, aux->endereco, aux->gerente);
+		aux = aux->prox;
+	}
+}
+
+void listarFilial(Filial *filiais, int id)
+{
+	Filial *filial = buscaFilial(filiais, id);
+
+	printf("Dados da Filial selecionada\n\n");
+	printf("ID: %d\nEndereco: %s\nGerente: %s", filial->id, filial->endereco, filial->gerente);
+}
+
+Filial *coletaDadosFilial()
+{
+	int id;
+	char endereco[50], gerente[30];
+
+	printf("Informe o ID da nova filial: ");
+	scanf("%d", &id);
+	printf("Informe o endereco da filial: ");
+	scanf("%s", endereco);
+	printf("Informe o nome do gerente da filial: ");
+	scanf("%s", gerente);
+
+	Filial *novaFilial = criaFilial(endereco, gerente, id);
+
+	return novaFilial;
+}
