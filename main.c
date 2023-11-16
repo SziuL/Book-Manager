@@ -6,18 +6,14 @@ void programa(Filial *filiais)
 	system("clear");
 	int escolha;
 
-	printf("1 - Listar os dados de todas as filiais.\n"
-		   "2 - Listar os dados de uma filial\n"
-		   "3 - Criar nova filial\n"
-		   "4 - Encerrar atividades de uma filial\n"
-		   "5 - Realizar operacoes no estoque de uma filial\n"
-		   "6 - Sair\n\n");
+	imprimeMenuPrincipal();
 
 	printf("Digite a opcao desejada: ");
 	scanf("%d", &escolha);
 
 	while (escolha != 6)
 	{
+
 		if (escolha == 1)
 			listarTodasFiliais(filiais);
 		else if (escolha == 2)
@@ -56,6 +52,11 @@ void programa(Filial *filiais)
 				   "Por favor, digite um numero valido.\n");
 			programa(filiais);
 		}
+
+		sleep(3);
+		imprimeMenuPrincipal();
+		printf("Digite a opcao desejada: ");
+		scanf("%d", &escolha);
 	}
 }
 

@@ -33,6 +33,16 @@ Filial *criaFilial(char *endereco, char *gerente, int id)
 }
 
 // Complementares
+void imprimeMenuPrincipal()
+{
+	printf("1 - Listar os dados de todas as filiais.\n"
+		   "2 - Listar os dados de uma filial\n"
+		   "3 - Criar nova filial\n"
+		   "4 - Encerrar atividades de uma filial\n"
+		   "5 - Realizar operacoes no estoque de uma filial\n"
+		   "6 - Sair\n\n");
+}
+
 int encriptar(char isbn[5])
 {
 	char nome[4];
@@ -419,9 +429,9 @@ Filial *coletaDadosFilial()
 	printf("Informe o ID da nova filial: ");
 	scanf("%d", &id);
 	printf("Informe o endereco da filial: ");
-	scanf("%s", endereco);
+	scanf("\n%[^\n]", endereco);
 	printf("Informe o nome do gerente da filial: ");
-	scanf("%s", gerente);
+	scanf("\n%[^\n]", gerente);
 
 	Filial *novaFilial = criaFilial(endereco, gerente, id);
 

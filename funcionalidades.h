@@ -18,6 +18,7 @@ void excluirFilial(Filial *filiais, int idOrigem, int idDestino);
 void operacoesFilial(Filial *filiais, Livro *livros);
 
 // complementares
+void imprimeMenuPrincipal();
 int encriptar(char isbn[5]);
 Filial *buscaFilial(Filial *filiais, int id, Filial **pred);
 Livro *menor(Livro *livro);
