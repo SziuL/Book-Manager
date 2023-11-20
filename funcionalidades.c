@@ -1,7 +1,7 @@
 #include "funcionalidades.h"
 
 // Funções de estrutura
-Livro *criaLivro(char *isbn, char *titulo, char *autor, int qtd)
+Livro *criaLivro(char isbn[5], char titulo[15], char autor[15], int qtd)
 {
 	Livro *novo = (Livro *)calloc(1, sizeof(Livro));
 	if (!novo)
@@ -43,7 +43,7 @@ void imprimeMenuPrincipal()
 		   "6 - Sair\n\n");
 }
 
-int encriptar(char isbn[5])
+int encriptar(char *isbn)
 {
 	char nome[5];
 	int soma = 0;
@@ -60,7 +60,7 @@ int encriptar(char isbn[5])
 Filial *buscaFilial(Filial *filiais, int id, Filial **pred)
 {
 	Filial *aux = filiais;
-	if (!aux)
+	if (aux == NULL)
 	{
 		printf("Nao ha filiais registradas!\n");
 		programa(filiais);
@@ -103,26 +103,39 @@ Livro *maior(Livro *livro)
 Livro *coletaDadosNovoLivro(Livro *livros)
 {
 	Livro *novoLivro;
-	char isbn[5], titulo[20], autor[30];
+	char isbn[5], titulo[15], autor[15];
 	int qtd = 0;
 
 	printf("Informe o ISBN do novo livro: \n");
 	scanf("\n%[^\n]", isbn);
-	int isbnEncriptado = encriptar(isbn);
+	char nome[5];
+	int soma = 0;
+	strcpy(nome, isbn);
+
+	for (int i = 0; i < 5; i++)
+	{
+		soma += nome[i];
+	}
+
+	int isbnEncriptado = soma;
 	qtd = percorreLivros(livros, isbnEncriptado, qtd);
 
-	printf("Agora informe o titulo do livro: \n");
+	printf("Agora informe o titulo do livro: ");
 	scanf("\n%[^\n]", titulo);
-	printf("Informe o autor do livro: \n");
+	fflush(stdin);
+	printf("Informe o autor do livro: ");
 	scanf("\n%[^\n]", autor);
+	fflush(stdin);
 
 	if (qtd <= 1)
 	{
+		fflush(stdin);
 		novoLivro = criaLivro(isbn, titulo, autor, qtd);
 		novoLivro->qtd += 1;
 	}
 	else
 	{
+		fflush(stdin);
 		novoLivro = buscarLivro(livros, isbn);
 		novoLivro->qtd = qtd + 1;
 	}
@@ -165,7 +178,15 @@ int percorreLivros(Livro *livros, int isbnEncriptado, int qtd)
 	if (livros)
 	{
 		Livro *auxLivro = livros;
-		int isbnAtual = encriptar(auxLivro->isbn);
+		char nome[5];
+		int soma = 0;
+		strcpy(nome, livros->isbn);
+
+		for (int i = 0; i < 5; i++)
+		{
+			soma += nome[i];
+		}
+		int isbnAtual = soma;
 
 		while (auxLivro != NULL)
 		{
@@ -230,7 +251,16 @@ Livro *buscarLivro(Livro *livros, char *isbn)
 	if (livros)
 	{
 		Livro *auxLivro = livros;
-		int isbnAtual = encriptar(auxLivro->isbn);
+		fflush(stdin);
+		char nome[5];
+		int soma = 0;
+		strcpy(nome, livros->isbn);
+
+		for (int i = 0; i < 5; i++)
+		{
+			soma += nome[i];
+		}
+		int isbnAtual = soma;
 
 		while (auxLivro != NULL)
 		{
@@ -394,6 +424,7 @@ void operacoesFilial(Filial *filiais, Livro *livros, int id)
 		listarLivrosOrdemCrescente(filiais, livros, id);
 	else if (escolha == 2)
 	{
+		fflush(stdin);
 		Livro *novoLivro = coletaDadosNovoLivro(livros);
 		if (novoLivro->qtd <= 1)
 			inserirLivro(&livros, novoLivro);
@@ -403,7 +434,14 @@ void operacoesFilial(Filial *filiais, Livro *livros, int id)
 		printf("Insira o ISBN do livro que deseja encontrar: \n");
 		char isbn[5];
 		scanf("%s", isbn);
-		buscarLivro(livros, isbn);
+		Livro *l = buscarLivro(livros, isbn);
+		system("clear");
+		printf("Livro encontrado:\n\nISBN: %5s"
+			   "\nTitulo: %s"
+			   "\nAutor: %s"
+			   "\nQuantidade de exemplares: %d",
+			   l->isbn, l->titulo, l->autor, l->qtd);
+		sleep(3);
 	}
 	else if (escolha == 4)
 		imprimirEstrutura(livros, 0);
@@ -426,6 +464,7 @@ void operacoesFilial(Filial *filiais, Livro *livros, int id)
 	Filial *predDes;
 	Filial *filialRetornda = buscaFilial(filiais, id, &predDes);
 	filialRetornda->livros = livros;
+	sleep(5);
 	operacoesFilial(filiais, livros, id);
 }
 
@@ -462,7 +501,7 @@ void listarFilial(Filial *filiais, int id)
 Filial *coletaDadosFilial()
 {
 	int id;
-	char endereco[50], gerente[30];
+	char endereco[15], gerente[15];
 
 	printf("Informe o ID da nova filial: ");
 	scanf("%d", &id);
@@ -472,7 +511,6 @@ Filial *coletaDadosFilial()
 	scanf("\n%[^\n]", gerente);
 
 	Filial *novaFilial = criaFilial(endereco, gerente, id);
-	
 
 	return novaFilial;
 }

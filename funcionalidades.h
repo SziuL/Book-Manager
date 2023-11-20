@@ -19,9 +19,8 @@ void operacoesFilial(Filial *filiais, Livro *livros, int id);
 
 // complementares
 void imprimeMenuPrincipal();
-int encriptar(char isbn[5]);
+int encriptar(char *isbn);
 Filial *buscaFilial(Filial *filiais, int id, Filial **pred);
-Livro *menor(Livro *livro);
 Livro *maior(Livro *livro);
 Livro *coletaDadosNovoLivro(Livro *livros);
 void imprimeIsbn(char *isbn, int n);

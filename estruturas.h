@@ -9,8 +9,8 @@
 typedef struct livro
 {
 	char isbn[5];
-	char titulo[20];
-	char autor[30];
+	char titulo[15];
+	char autor[15];
 	int qtd;
 	struct livro *dir, *esq, *pai;
 } Livro;
@@ -18,13 +18,13 @@ typedef struct livro
 typedef struct filial
 {
 	int id;
-	char endereco[50];
-	char gerente[30];
+	char endereco[15];
+	char gerente[15];
 	struct filial *prox;
 	Livro *livros;
 } Filial;
 
 Filial *criaFilial(char *endereco, char *gerente, int id);
-Livro *criaLivro(char *isbn, char *titulo, char *autor, int qtd);
+Livro *criaLivro(char isbn[5], char titulo[15], char autor[15], int qtd);
 
 #endif
