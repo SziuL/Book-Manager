@@ -25,6 +25,6 @@ typedef struct filial
 } Filial;
 
 Filial *criaFilial(char *endereco, char *gerente, int id);
-Livro *criaLivro(char *isbn, char *titulo, char *autor);
+Livro *criaLivro(char *isbn, char *titulo, char *autor, int qtd);
 
 #endif

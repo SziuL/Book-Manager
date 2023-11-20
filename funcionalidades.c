@@ -1,7 +1,7 @@
 #include "funcionalidades.h"
 
 // Funções de estrutura
-Livro *criaLivro(char *isbn, char *titulo, char *autor)
+Livro *criaLivro(char *isbn, char *titulo, char *autor, int qtd)
 {
 	Livro *novo = (Livro *)calloc(1, sizeof(Livro));
 	if (!novo)
@@ -12,7 +12,7 @@ Livro *criaLivro(char *isbn, char *titulo, char *autor)
 	strcpy(novo->isbn, isbn);
 	strcpy(novo->titulo, titulo);
 	strcpy(novo->autor, autor);
-	novo->qtd = 0;
+	novo->qtd = qtd;
 
 	return novo;
 }
@@ -45,7 +45,7 @@ void imprimeMenuPrincipal()
 
 int encriptar(char isbn[5])
 {
-	char nome[4];
+	char nome[5];
 	int soma = 0;
 	strcpy(nome, isbn);
 
@@ -66,35 +66,16 @@ Filial *buscaFilial(Filial *filiais, int id, Filial **pred)
 		programa(filiais);
 	}
 	while (aux->id != id && aux != NULL)
+	{
+		(*pred) = aux;
 		aux = aux->prox;
+	}
 
 	if (aux == NULL)
 	{
 		printf("Filial nao enconteada.\n");
 		programa(filiais);
 	}
-	return aux;
-}
-
-Livro *menor(Livro *livro)
-{
-	Livro *aux = livro;
-
-	if (livro == NULL)
-	{
-		return NULL;
-	}
-	else
-	{
-		while (aux != NULL)
-		{
-			if (aux->esq == NULL)
-				return aux;
-			else
-				aux = aux->esq;
-		}
-	}
-
 	return aux;
 }
 
@@ -119,17 +100,32 @@ Livro *maior(Livro *livro)
 	return aux;
 }
 
-Livro *coletaDadosNovoLivro()
+Livro *coletaDadosNovoLivro(Livro *livros)
 {
+	Livro *novoLivro;
 	char isbn[5], titulo[20], autor[30];
-	int qtd;
+	int qtd = 0;
 
 	printf("Informe o ISBN do novo livro: \n");
-	scanf("%s", isbn);
-	printf("Agora informe o titulo e autor do livro, respectivamente  ('titulo' 'autor'): \n");
-	scanf("%s %s", titulo, autor);
+	scanf("\n%[^\n]", isbn);
+	int isbnEncriptado = encriptar(isbn);
+	qtd = percorreLivros(livros, isbnEncriptado, qtd);
 
-	Livro *novoLivro = criaLivro(isbn, titulo, autor);
+	printf("Agora informe o titulo do livro: \n");
+	scanf("\n%[^\n]", titulo);
+	printf("Informe o autor do livro: \n");
+	scanf("\n%[^\n]", autor);
+
+	if (qtd <= 1)
+	{
+		novoLivro = criaLivro(isbn, titulo, autor, qtd);
+		novoLivro->qtd += 1;
+	}
+	else
+	{
+		novoLivro = buscarLivro(livros, isbn);
+		novoLivro->qtd = qtd + 1;
+	}
 
 	return novoLivro;
 }
@@ -147,59 +143,83 @@ void imprimeIsbn(char *isbn, int n)
 		printf(" \n");
 }
 
-void inserirFilial(Filial *filiais, Filial *novaFilial)
+void inserirFilial(Filial **filiais, Filial *novaFilial)
 {
-	Filial *aux = filiais;
-	if (aux == NULL)
+	Filial **aux = filiais;
+	if (*aux == NULL)
 	{
-		filiais = novaFilial;
+		(*filiais) = novaFilial;
 	}
 	else
 	{
-		while (aux->prox != NULL)
-			aux = aux->prox;
-		aux->prox = novaFilial;
+		while ((*aux)->prox != NULL)
+			(*aux) = (*aux)->prox;
+		(*aux)->prox = novaFilial;
 	}
 
 	printf("Filial inserida com sucesso!\n");
 }
 
-void percorreLivros(Livro *livrosOrigem, Livro *baseDadosDestino)
+int percorreLivros(Livro *livros, int isbnEncriptado, int qtd)
+{
+	if (livros)
+	{
+		Livro *auxLivro = livros;
+		int isbnAtual = encriptar(auxLivro->isbn);
+
+		while (auxLivro != NULL)
+		{
+			if (isbnEncriptado == isbnAtual)
+				qtd++;
+			else if (isbnEncriptado < isbnAtual)
+				isbnAtual = encriptar(auxLivro->esq->isbn);
+			else if (isbnEncriptado > isbnAtual)
+				isbnAtual = encriptar(auxLivro->dir->isbn);
+
+			if (auxLivro)
+				isbnAtual = encriptar(auxLivro->isbn);
+		}
+	}
+
+	return qtd;
+}
+
+void percorreLivrosExcluir(Livro *livrosOrigem, Livro *baseDadosDestino)
 {
 	Livro *aux = livrosOrigem;
 	if (aux != NULL)
 	{
 		aux = livrosOrigem->esq;
-		percorreLivros(aux, baseDadosDestino);
-		inserirLivro(baseDadosDestino, aux);
+		percorreLivrosExcluir(aux, baseDadosDestino);
+		inserirLivro(&baseDadosDestino, aux);
 		aux = livrosOrigem->dir;
-		percorreLivros(aux, baseDadosDestino);
+		percorreLivrosExcluir(aux, baseDadosDestino);
 	}
-	Livro *excluir;
+	Livro *excluir = livrosOrigem;
 
 	if (excluir != NULL)
 	{
 		excluir = livrosOrigem->esq;
-		percorreLivros(excluir, baseDadosDestino);
+		percorreLivrosExcluir(excluir, baseDadosDestino);
 		free(excluir);
 		excluir = livrosOrigem->dir;
-		percorreLivros(excluir, baseDadosDestino);
+		percorreLivrosExcluir(excluir, baseDadosDestino);
 	}
 }
 
 // operações com LIVROS
-void listarLivrosOrdemCrescente(Filial *filiais, Livro *livros)
+void listarLivrosOrdemCrescente(Filial *filiais, Livro *livros, int id)
 {
 	if (livros == NULL)
 	{
 		printf("Filial nao possui livros!\n");
-		operacoesFilial(filiais, livros);
+		operacoesFilial(filiais, livros, id);
 	}
 	else
 	{
-		listarLivrosOrdemCrescente(filiais, livros->esq);
+		listarLivrosOrdemCrescente(filiais, livros->esq, id);
 		printf("%s\t", livros->isbn);
-		listarLivrosOrdemCrescente(filiais, livros->dir);
+		listarLivrosOrdemCrescente(filiais, livros->dir, id);
 	}
 }
 
@@ -225,46 +245,45 @@ Livro *buscarLivro(Livro *livros, char *isbn)
 				isbnAtual = encriptar(auxLivro->isbn);
 		}
 	}
-	else
-	{
-		printf("Filial nao econtrada.\n");
-		return NULL;
-	}
 
-	printf("Livro nao encontrado.\n");
+	printf("Livro nao econtrado.\n");
 	return NULL;
 }
 
-void inserirLivro(Livro *livros, Livro *novoLivro)
+void inserirLivro(Livro **livros, Livro *novoLivro)
 {
-
-	if (livros)
+	if ((*livros) != NULL)
 	{
-		Livro *livroAtual = livros;
-		int atual = encriptar(livroAtual->isbn);
+
+		Livro **livroAtual = livros;
+		int atual = encriptar((*livroAtual)->isbn);
 		int isbnNovo = encriptar(novoLivro->isbn);
 
 		while (livroAtual != NULL)
 		{
 			if (isbnNovo < atual)
 			{
-				if (livroAtual->esq == NULL)
+				if ((*livroAtual)->esq == NULL)
 				{
-					livroAtual->esq = novoLivro;
-					novoLivro->pai = livroAtual;
+					(*livroAtual)->esq = novoLivro;
+					novoLivro->pai = (*livroAtual);
 				}
-				livroAtual = livroAtual->esq;
+				(*livroAtual) = (*livroAtual)->esq;
 			}
 			else
 			{
-				if (livroAtual->dir == NULL)
+				if ((*livroAtual)->dir == NULL)
 				{
-					livroAtual->dir = novoLivro;
-					novoLivro->pai = livroAtual;
+					(*livroAtual)->dir = novoLivro;
+					novoLivro->pai = (*livroAtual);
 				}
-				livroAtual = livroAtual->dir;
+				(*livroAtual) = (*livroAtual)->dir;
 			}
 		}
+	}
+	else
+	{
+		(*livros) = novoLivro;
 	}
 }
 
@@ -342,12 +361,23 @@ Livro *excluirLivro(Livro *livros, char *isbn)
 
 void selecionaFilial(Filial *filiais, int id)
 {
-	Filial *filial = buscaFilial(filiais, id, NULL);
-	operacoesFilial(filiais, filial->livros);
+	system("clear");
+	Filial *predDes;
+	Filial *filial = buscaFilial(filiais, id, &predDes);
+	if (filial)
+		printf("Filial encontrada!\n");
+	else
+	{
+		printf("Filial inexistente.\n");
+		programa(filiais);
+	}
+	operacoesFilial(filiais, filial->livros, id);
 }
 
-void operacoesFilial(Filial *filiais, Livro *livros)
+void operacoesFilial(Filial *filiais, Livro *livros, int id)
 {
+	sleep(3);
+	system("clear");
 	int escolha;
 
 	printf("1 - Imprimir lista de livros em ordem crescente de ISBN.\n"
@@ -359,47 +389,51 @@ void operacoesFilial(Filial *filiais, Livro *livros)
 
 	printf("Digite a opcao desejada: ");
 	scanf("%d", &escolha);
-	int a = 0;
-	while (escolha != 6)
+
+	if (escolha == 1)
+		listarLivrosOrdemCrescente(filiais, livros, id);
+	else if (escolha == 2)
 	{
-		if (escolha == 1)
-			listarLivrosOrdemCrescente(filiais, livros);
-		else if (escolha == 2)
-		{
-			Livro *novoLivro = coletaDadosNovoLivro();
-			inserirLivro(livros, novoLivro);
-		}
-		else if (escolha == 3)
-		{
-			printf("Insira o ISBN do livro que deseja encontrar: \n");
-			char isbn[5];
-			scanf("%s", isbn);
-			buscarLivro(livros, isbn);
-		}
-		else if (escolha == 4)
-			imprimirEstrutura(livros, 0);
-		else if (escolha == 5)
-		{
-			printf("Insira o ISBN do livro que deseja excluir: \n");
-			char isbn[5];
-			scanf("%s", isbn);
-			excluirLivro(livros, isbn);
-		}
-		else if (escolha == 6)
-			programa(filiais);
-		else
-		{
-			printf("Escolha invalida.\n"
-				   "Por favor, digite um numero valido.\n");
-			system("cls");
-		}
+		Livro *novoLivro = coletaDadosNovoLivro(livros);
+		if (novoLivro->qtd <= 1)
+			inserirLivro(&livros, novoLivro);
 	}
+	else if (escolha == 3)
+	{
+		printf("Insira o ISBN do livro que deseja encontrar: \n");
+		char isbn[5];
+		scanf("%s", isbn);
+		buscarLivro(livros, isbn);
+	}
+	else if (escolha == 4)
+		imprimirEstrutura(livros, 0);
+	else if (escolha == 5)
+	{
+		printf("Insira o ISBN do livro que deseja excluir: \n");
+		char isbn[5];
+		scanf("%s", isbn);
+		excluirLivro(livros, isbn);
+	}
+	else if (escolha == 6)
+		programa(filiais);
+	else
+	{
+		printf("Escolha invalida.\n"
+			   "Por favor, digite um numero valido.\n");
+		operacoesFilial(filiais, livros, id);
+	}
+
+	Filial *predDes;
+	Filial *filialRetornda = buscaFilial(filiais, id, &predDes);
+	filialRetornda->livros = livros;
+	operacoesFilial(filiais, livros, id);
 }
 
 // operações com FILIAIS
 void listarTodasFiliais(Filial *filiais)
 {
 	Filial *aux = filiais;
+	int espera = 0;
 	if (!aux)
 	{
 		printf("Nao ha filiais cadastradas.\n");
@@ -408,17 +442,21 @@ void listarTodasFiliais(Filial *filiais)
 	printf("Lista de Filiais\n\n");
 	while (aux != NULL)
 	{
+		espera += 2;
 		printf("1\n\tID: %d\n\tEndereco: %s\n\tGerente: %s\n\n", aux->id, aux->endereco, aux->gerente);
 		aux = aux->prox;
 	}
+
+	sleep(espera); // cálculo básico para determinar o tempo que o leitor terá para observar os resultados.
 }
 
 void listarFilial(Filial *filiais, int id)
 {
-	Filial *filial = buscaFilial(filiais, id, NULL);
+	Filial *predDes;
+	Filial *filial = buscaFilial(filiais, id, &predDes);
 
 	printf("Dados da Filial selecionada\n\n");
-	printf("ID: %d\nEndereco: %s\nGerente: %s", filial->id, filial->endereco, filial->gerente);
+	printf("ID: %d\nEndereco: %s\nGerente: %s\n", filial->id, filial->endereco, filial->gerente);
 }
 
 Filial *coletaDadosFilial()
@@ -434,15 +472,16 @@ Filial *coletaDadosFilial()
 	scanf("\n%[^\n]", gerente);
 
 	Filial *novaFilial = criaFilial(endereco, gerente, id);
+	
 
 	return novaFilial;
 }
 
 void excluirFilial(Filial *filiais, int idOrigem, int idDestino)
 {
-	Filial *pred;
+	Filial *pred, *predDes;
 	Filial *filialOrigem = buscaFilial(filiais, idOrigem, &pred);
-	Filial *filialDestino = buscaFilial(filiais, idDestino, NULL);
+	Filial *filialDestino = buscaFilial(filiais, idDestino, &predDes);
 
 	if (!filialOrigem && !filialDestino)
 	{
@@ -452,7 +491,7 @@ void excluirFilial(Filial *filiais, int idOrigem, int idDestino)
 	}
 	else
 	{
-		percorreLivros(filialOrigem->livros, filialDestino->livros);
+		percorreLivrosExcluir(filialOrigem->livros, filialDestino->livros);
 
 		pred->prox = filialOrigem->prox;
 		free(filialOrigem);
